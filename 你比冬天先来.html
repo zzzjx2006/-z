@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 适配微信内置浏览器 -->
+    <meta name="weixin-webview-api-version" content="1.6.0">
+    <title>温馨提示</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        /* 第一个弹窗样式（居中显示） */
+        .first-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 120px;
+            background: lightcoral;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000; /* 确保在最上层 */
+        }
+        /* 关闭按钮（右上角） */
+        .close-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 22px;
+            cursor: pointer;
+            color: #555;
+        }
+        /* 后续飘屏弹窗样式 */
+        .sub-popup {
+            position: fixed;
+            width: 250px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+        /* 适配移动端触摸反馈 */
+        .close-btn, .sub-popup {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一个固定弹窗（默认显示） -->
+    <div class="first-popup" id="firstPopup">
+        <span>你比冬天先来</span>
+        <div class="close-btn" id="closeFirst">&times;</div>
+    </div>
+
+    <script>
+        // 1. 后续飘屏的提示语列表
+        const tips = [
+            "多喝水哦~", "保持微笑呀", "照顾好自己", "每天都要开开心心的哦", 
+            "记得吃水果", "我想你了", "期待下次的见面", "保持好心情哦", 
+            "顺顺利利", "别熬夜啦", "早点休息", "梦想成真", 
+            "今天有没有开心嘛", "天冷了多穿衣服", "愿所有烦恼都消失"
+        ];
+        // 后续飘屏的背景色列表
+        const bgColors = [
+            'lightgreen', 'lightyellow', 'skyblue', 'plum', 'bisque', 
+            'mistyrose', 'oldlace', 'lavender', 'lavenderblush'
+        ];
+        // 后续飘屏数量（可调整，避免过多影响体验）
+        const popupCount = 20;
+
+        // 2. 获取第一个弹窗元素
+        const firstPopup = document.getElementById('firstPopup');
+        const closeFirstBtn = document.getElementById('closeFirst');
+
+        // 3. 关闭第一个弹窗后，触发后续飘屏
+        closeFirstBtn.addEventListener('click', () => {
+            firstPopup.style.display = 'none'; // 隐藏第一个弹窗
+            startSubsequentPopups(); // 启动飘屏
+        });
+
+        // 4. 创建单个飘屏弹窗的函数
+        function createSubPopup() {
+            // 创建弹窗元素
+            const popup = document.createElement('div');
+            popup.className = 'sub-popup';
+            
+            // 随机设置内容、背景色
+            popup.innerText = tips[Math.floor(Math.random() * tips.length)];
+            popup.style.background = bgColors[Math.floor(Math.random() * bgColors.length)];
+            
+            // 随机设置位置（确保在屏幕内）
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const popupWidth = 250;
+            const popupHeight = 80;
+            // 计算随机位置（避免超出屏幕）
+            const x = Math.floor(Math.random() * (screenWidth - popupWidth));
+            const y = Math.floor(Math.random() * (screenHeight - popupHeight));
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+
+            // 点击飘屏弹窗时关闭
+            popup.addEventListener('click', () => {
+                popup.style.opacity = '0'; // 淡出效果
+                setTimeout(() => {
+                    document.body.removeChild(popup); // 移除元素
+                }, 300); // 配合CSS过渡时间
+            });
+
+            // 添加到页面
+            document.body.appendChild(popup);
+        }
+
+        // 5. 批量启动飘屏（间隔触发，避免卡顿）
+        function startSubsequentPopups() {
+            for (let i = 0; i < popupCount; i++) {
+                // 间隔0.1秒创建一个弹窗，避免瞬间堆积
+                setTimeout(createSubPopup, i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
